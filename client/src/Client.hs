@@ -61,7 +61,7 @@ main = withSocketsDo $ do
   B.hPut h "\n"
   putStrLn "Data sent"
 
-  d <- eitherDecode <$> (B.hGetContents h) :: IO (Either String Object) 
+  d <- eitherDecode <$> (B.hGetContents h) :: IO (Either String Report) 
   case d of
     Left err -> putStrLn err
     Right ps -> print ps
