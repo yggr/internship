@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 import Network
 import System.IO
@@ -6,7 +6,6 @@ import Data.Aeson
 import Data.Text
 import Control.Applicative
 import Control.Monad
-import GHC.Generics
 import qualified Data.ByteString.Lazy as B
 
 host :: HostName
@@ -20,18 +19,36 @@ data User =
         , lastName  ::  !Text
         , age       ::  Int
         , sn        ::  !Text
-          } deriving (Show,Generic)
+          } deriving (Show)
 
-instance FromJSON User
-instance ToJSON User
+instance FromJSON User where
+  parseJSON (Object v) = User             <$>
+                         v .: "firstName" <*>
+                         v .: "lastName"  <*>
+                         v .: "age"       <*>
+                         v .: "sn"
+  parseJSON _           = mzero
+
+instance ToJSON User where
+  toJSON (User firstName lastName age sn) = object [ "firstName" .= firstName,
+                                                     "lastName"  .= lastName,
+                                                     "age"       .= age,
+                                                     "sn"        .= sn        ]
 
 data Report = 
   Report  { original_message  ::  !Text
           , success           ::  Bool
-            } deriving (Show, Generic)
+            } deriving (Show)
 
-instance FromJSON Report
-instance ToJSON Report
+instance FromJSON Report where
+  parseJSON (Object v) = Report                  <$>
+                         v .: "original_message" <*>
+                         v .: "success"
+  parseJSON _           = mzero
+
+instance ToJSON Report where
+  toJSON (Report original_message success) = object [ "original_message" .= original_message,
+                                                      "success"          .= success         ]
 
 main :: IO ()
 main = withSocketsDo $ do
