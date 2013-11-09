@@ -50,18 +50,46 @@ instance ToJSON Report where
   toJSON (Report original_message success) = object [ "original_message" .= original_message,
                                                       "success"          .= success         ]
 
+ifM :: Monad m => m Bool -> m b -> m b -> m b
+ifM p t f  = p >>= (\p' -> if p' then t else f)
+
+while' :: Monad m => m Bool -> m Bool -> m ()
+while' x y = ifM x (return ()) $ ifM y (return ()) $ while' x y
+
+send :: Handle -> IO Bool
+send h = do
+	putStr "Send: "
+	input <- getLine
+	hPutStrLn h input
+	return $ Prelude.null input
+
+receive :: Handle -> IO Bool
+receive h = do
+	putStr "Receiving: "
+	input <- hGetLine h
+	putStrLn input
+	return $ Prelude.null input
+
 main :: IO ()
 main = withSocketsDo $ do
+  putStrLn "Waiting for connection..."
   h <- connectTo host port 
   hSetBuffering h LineBuffering
   hSetBinaryMode h True
+  putStrLn $ "Connected to " ++ host ++ " " ++ show port
   
-  let s = User "Nils" "Schweinsberg" 99 "McManiaC"
-  B.hPut h (encode s)
-  B.hPut h "\n"
-  putStrLn "Data sent"
+  while' (send h) (receive h)
 
-  d <- eitherDecode <$> (B.hGetContents h) :: IO (Either String Report) 
-  case d of
-    Left err -> putStrLn err
-    Right ps -> print ps
+  --Remove this after adjusting sending/receiving to use JSON
+  hClose h
+
+--  All the JSON stuff, just keeping for reference
+--  let s = User "Nils" "Schweinsberg" 99 "McManiaC"
+--  B.hPut h (encode s)
+--  B.hPut h "\n"
+--  putStrLn "Data sent"
+
+--  d <- eitherDecode <$> (B.hGetContents h) :: IO (Either String Report) 
+--  case d of
+--    Left err -> putStrLn err
+--    Right ps -> print ps
