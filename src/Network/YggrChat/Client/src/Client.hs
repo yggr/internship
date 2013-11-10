@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+module Network.YggrChat.Client where
 
 import Network
 import System.IO
@@ -7,6 +8,7 @@ import Data.Text
 import Control.Applicative
 import Control.Monad
 import qualified Data.ByteString.Lazy as B
+import Network.YggrChat.Protocol
 
 host :: HostName
 host = "nils.cc"
