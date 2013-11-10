@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings, DeriveGeneric #-}
-module Network.YggrChat.Protocol where
+module Network.YggrChat.ChatProtocol where
 
 import Data.Time.Clock (UTCTime)
 import Data.Aeson

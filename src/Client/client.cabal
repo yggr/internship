@@ -47,9 +47,8 @@ cabal-version:       >=1.8
 
 executable client
   main-is:             Client.hs
-  other-modules:
-   Network.YggrChat.Protocol
+  -- other-modules:
   -- other-extensions:    
-  build-depends:       base >=4.6 && <4.7, network, bytestring, text, aeson
+  build-depends:       base >=4.6 && <4.7, network, bytestring, text, aeson, chatprotocol
   hs-source-dirs:      src
   default-language:    Haskell2010
