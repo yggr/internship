@@ -16,7 +16,11 @@ build-type:          Simple
 cabal-version:       >=1.8
 
 library
+
+  HS-source-dirs: src
+  GHC-options: -Wall -O3
+  
   exposed-modules:
     Network.YggrChat.ChatProtocol
   -- other-modules:       
-  build-depends:       base ==4.6.*
+  build-depends:       base ==4.6.*, bytestring, aeson, text, time
