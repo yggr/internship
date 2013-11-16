@@ -6,6 +6,7 @@ import Data.Aeson
 import Data.Text
 import Control.Applicative
 import Control.Monad
+import Data.Time.Clock
 import qualified Data.ByteString.Lazy as B
 import Network.YggrChat.ChatProtocol
 
@@ -36,6 +37,7 @@ instance ToJSON User where
                                                      "age"       .= age,
                                                      "sn"        .= sn        ]
 
+
 data Report = 
   Report  { original_message  ::  !Text
           , success           ::  Bool
@@ -57,40 +59,43 @@ ifM p t f  = p >>= (\p' -> if p' then t else f)
 while' :: Monad m => m Bool -> m Bool -> m ()
 while' x y = ifM x (return ()) $ ifM y (return ()) $ while' x y
 
-send :: Handle -> IO Bool
-send h = do
-	putStr "Send: "
-	input <- getLine
-	hPutStrLn h input
-	return $ Prelude.null input
+send :: Handle -> String -> UTCTime -> IO Bool
+send h u t = do
+  putStr "Send: "
+  input <- getLine
+  B.hPut h $ encode $ ChatMessage { timestamp = t, username = (pack u), chatMessage = (pack input) }
+  B.hPut h "\n"
+  return $ Prelude.null input
 
 receive :: Handle -> IO Bool
 receive h = do
-	putStr "Receiving: "
-	input <- hGetLine h
-	putStrLn input
-	return $ Prelude.null input
+  putStr "Receiving: "
+  input <- hGetLine h
+  putStrLn input
+  return $ Prelude.null input
 
 main :: IO ()
 main = withSocketsDo $ do
+  t <- getCurrentTime
+  putStr "Enter username: "
+  s <- getLine
+  let helloServer = encode(HelloMessage { desiredUsername = (pack s) })
+
   putStrLn "Waiting for connection..."
-  h <- connectTo host port 
+  h <- connectTo host port
+
   hSetBuffering h LineBuffering
   hSetBinaryMode h True
   putStrLn $ "Connected to " ++ host ++ " " ++ show port
   
-  while' (send h) (receive h)
+  B.hPut h helloServer
+  B.hPut h "\n"
+  
+  d <- eitherDecode <$> (B.hGetContents h) :: IO (Either String Report)
+  case d of
+    Left err -> putStrLn err
+    Right ps -> print ps
 
-  --Remove this after adjusting sending/receiving to use JSON
+  while' (send h s t) (receive h)
+
   hClose h
-
---  All the JSON stuff, just keeping for reference
---  let s = User "Nils" "Schweinsberg" 99 "McManiaC"
---  B.hPut h (encode s)
---  B.hPut h "\n"
---  putStrLn "Data sent"
-
---  d <- eitherDecode <$> (B.hGetContents h) :: IO (Either String Report) 
---  case d of
---    Left err -> putStrLn err
---    Right ps -> print ps

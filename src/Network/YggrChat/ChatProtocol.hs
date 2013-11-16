@@ -4,15 +4,14 @@ module Network.YggrChat.ChatProtocol where
 import Data.Time.Clock (UTCTime)
 import Data.Aeson
 import Data.Text
-import qualified Data.ByteString.Lazy as B
 import GHC.Generics
 
 data Message 
   = HelloMessage { desiredUsername :: !Text         }       
-  | ChatMessage  { timestamp       :: Maybe UTCTime
+  | ChatMessage  { timestamp       :: UTCTime
                  , username        :: !Text         
                  , chatMessage     :: !Text         }       
-  | PvtMessage   { timestamp       :: Maybe UTCTime
+  | PvtMessage   { timestamp       :: UTCTime
                  , targetUser      :: !Text 
                  , username        :: !Text
                  , chatMessage     :: !Text         }
@@ -20,4 +19,3 @@ data Message
 
 instance FromJSON Message
 instance ToJSON Message
-
