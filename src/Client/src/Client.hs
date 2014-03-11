@@ -76,6 +76,8 @@ receive h = do
 
 main :: IO ()
 main = withSocketsDo $ do
+  --Just for testing UTCTime. Insert this somewhere where it will be updated every sent message
+  --or arrange for the server to handle time (probably best)
   t <- getCurrentTime
   putStr "Enter username: "
   s <- getLine
